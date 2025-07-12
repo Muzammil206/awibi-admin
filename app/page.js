@@ -1,9 +1,10 @@
 import Image from "next/image";
+import DashboardPage from "./dashboard/page";
 
 export default function Home() {
   return (
     <div>
-      <h1>Welcome to Awi-BiBi Admin</h1>
+      <DashboardPage />
     </div>
   );
 }
