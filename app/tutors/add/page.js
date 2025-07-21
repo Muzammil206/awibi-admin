@@ -1,38 +1,27 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { TutorsHeader } from "@/components/tutors-header"
-import { TutorsSearchFilter } from "@/components/tutors-search-filter"
-import { TutorsTable } from "@/components/tutors-table"
-import { TopUpModal } from "@/components/top-up-modal"
-import { Pagination } from "@/components/pagination"
-import { AddTutorButton } from "@/components/add-tutor-button"
+import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
+import { AddTutorForm } from "@/components/add-tutor-form"
+import { Separator } from "@/components/ui/separator"
 
-export default function TutorsPage() {
-  const [showTopUpModal, setShowTopUpModal] = useState(false)
-
-
+export default function AddTutorPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <TutorsHeader />
-      <TutorsSearchFilter />
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-
-        {/* Add Tutor Button */}
-        <AddTutorButton />
-
-        {/* Tutors Table */}
-        <TutorsTable />
-
-        {/* Pagination */}
-        <div className="mt-8">
-          <Pagination />
-        </div>
-      </main>
-
-      {/* Top-Up Modal */}
-      <TopUpModal isOpen={showTopUpModal} onClose={() => setShowTopUpModal(false)} />
-    </div>
+    <SidebarProvider defaultOpen={true}>
+      <AppSidebar />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <div className="flex flex-col">
+            <h1 className="text-2xl font-bold text-gray-900">Add Tutor</h1>
+            <p className="text-gray-600 text-sm">Input tutor details</p>
+          </div>
+        </header>
+        <main className="flex-1 p-8 bg-gray-50">
+          <AddTutorForm />
+        </main>
+      </SidebarInset>
+    </SidebarProvider>
   )
 }

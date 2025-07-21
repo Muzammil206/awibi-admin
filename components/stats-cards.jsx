@@ -1,44 +1,49 @@
-import { FolderOpen, Users } from "lucide-react"
+import { Users, BookOpen, UserCheck, Heart } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 
 export function StatsCards() {
   const stats = [
     {
-      title: "Total Courses",
-      value: "345",
-      icon: FolderOpen,
-      borderColor: "border-purple-200",
+      title: "Users",
+      value: "592k",
+      icon: Users,
+      iconBg: "bg-blue-100",
+      iconColor: "text-blue-600",
+    },
+    {
+      title: "Courses",
+      value: "3.5k",
+      icon: BookOpen,
+      iconBg: "bg-green-100",
+      iconColor: "text-green-600",
+    },
+    {
+      title: "Enrolled users",
+      value: "2.9k",
+      icon: UserCheck,
+      iconBg: "bg-purple-100",
       iconColor: "text-purple-600",
     },
     {
-      title: "Total Students",
-      value: "3,500",
-      icon: Users,
-      borderColor: "border-teal-200",
-      iconColor: "text-teal-600",
-    },
-    {
-      title: "Total tutors",
-      value: "1349",
-      icon: Users,
-      borderColor: "border-red-200",
+      title: "Certificates",
+      value: "952",
+      icon: Heart,
+      iconBg: "bg-red-100",
       iconColor: "text-red-600",
     },
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {stats.map((stat, index) => (
-        <Card key={index} className={`${stat.borderColor} border-2 bg-white`}>
-          <CardContent className="p-6">
-            <div className="flex items-center space-x-4">
-              <div className={`p-3 rounded-lg bg-gray-50`}>
-                <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
-                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-              </div>
+        <Card key={index} className="bg-white border border-gray-200 shadow-sm">
+          <CardContent className="p-6 flex items-center space-x-4">
+            <div className={`p-3 rounded-lg ${stat.iconBg}`}>
+              <stat.icon className={`w-6 h-6 ${stat.iconColor}`} />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 mb-1">{stat.title}</p>
+              <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
             </div>
           </CardContent>
         </Card>
