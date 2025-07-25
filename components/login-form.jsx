@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Cookies from "js-cookie"
 import { Eye, Twitter } from "lucide-react" // Import Chrome and Twitter icons
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -59,6 +60,8 @@ export function LoginForm() {
       console.log(data)
 
       if (res.ok && data.success) {
+        // Set authentication cookie for middleware
+        Cookies.set("user", data.token || "authenticated", { expires: 7 })
         toast.success("Login successful! Redirecting to dashboard...")
         router.push("/dashboard")
       } else {
