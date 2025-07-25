@@ -30,7 +30,7 @@ export function BooksTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-gray-600">Title</TableHead>
+            <TableHead className="text-gray-600 front-medium">Title</TableHead>
             <TableHead className="text-gray-600">Category</TableHead>
             <TableHead className="text-gray-600">Uploaded</TableHead>
             <TableHead className="text-gray-600">Actions</TableHead>
@@ -39,9 +39,43 @@ export function BooksTable() {
         <TableBody>
           {books.map((book) => (
             <TableRow key={book.id}>
-              <TableCell className="font-medium text-gray-900">{book.title}</TableCell>
-              <TableCell className="text-gray-600">{book.category}</TableCell>
-              <TableCell className="text-gray-600">{book.uploaded}</TableCell>
+              <TableCell
+                className="font-medium"
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {book.title}
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {book.category}
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {book.uploaded}
+              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

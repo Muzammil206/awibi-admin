@@ -40,10 +40,55 @@ export function VideosTable() {
         <TableBody>
           {videos.map((video) => (
             <TableRow key={video.id}>
-              <TableCell className="font-medium text-gray-900">{video.title}</TableCell>
-              <TableCell className="text-gray-600">{video.timesWatched}</TableCell>
-              <TableCell className="text-gray-600">{video.duration}</TableCell>
-              <TableCell className="text-gray-600">{video.date}</TableCell>
+              <TableCell
+                className="font-medium"
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {video.title}
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {video.timesWatched}
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {video.duration}
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {video.date}
+              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

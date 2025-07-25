@@ -32,60 +32,91 @@ export function CoursesTable() {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-gray-600">Course Name</TableHead>
-            <TableHead className="text-gray-600">Status</TableHead>
-            <TableHead className="text-gray-600">Price</TableHead>
-            <TableHead className="text-gray-600">Category</TableHead>
-            <TableHead className="text-gray-600">Tags</TableHead>
-            <TableHead className="text-gray-600">Students</TableHead>
-            <TableHead className="text-gray-600">Last Updated</TableHead>
-            <TableHead className="text-gray-600">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {courses.map((course) => (
-            <TableRow key={course.id}>
-              <TableCell className="text-gray-900 font-medium">{course.title}</TableCell>
-              <TableCell>
-                <Badge
-                  variant="outline"
-                  className={`${
-                    course.status === "Published"
-                      ? "bg-green-100 text-green-800 border-green-200"
-                      : "bg-gray-100 text-gray-800 border-gray-200"
-                  }`}
-                >
-                  {course.status}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-gray-600">{course.price}</TableCell>
-              <TableCell className="text-gray-600">{course.category}</TableCell>
-              <TableCell className="text-gray-600">{course.tags}</TableCell>
-              <TableCell className="text-gray-600">{course.studentsEnrolled}</TableCell>
-              <TableCell className="text-gray-600">{course.lastUpdated}</TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="w-8 h-8 p-0">
-                      <MoreHorizontal className="w-4 h-4 text-gray-600" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem onClick={() => handleEdit(course.id)}>Edit course</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDelete(course.id)} className="text-red-600">
-                      Delete course
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
+    <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
+      <div className="overflow-x-auto">
+        <Table className="w-full">
+          <TableHeader>
+            <TableRow className="border-b border-gray-100 bg-gray-50/50">
+              <TableHead className="text-gray-700 font-medium text-sm py-4 px-4 min-w-[200px]">Course Name</TableHead>
+              <TableHead className="text-gray-700 font-medium text-sm py-4 px-4 w-[100px]">Status</TableHead>
+              <TableHead className="text-gray-700 font-medium text-sm py-4 px-4 w-[80px]">Price</TableHead>
+              <TableHead className="text-gray-700 font-medium text-sm py-4 px-4 w-[120px]">Category</TableHead>
+              <TableHead className="text-gray-700 font-medium text-sm py-4 px-4 min-w-[150px]">Tags</TableHead>
+              <TableHead className="text-gray-700 font-medium text-sm py-4 px-4 w-[80px]">Students</TableHead>
+              <TableHead className="text-gray-700 font-medium text-sm py-4 px-4 w-[100px]">Last Updated</TableHead>
+              <TableHead className="text-gray-700 font-medium text-sm py-4 px-4 w-[80px]">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {courses.map((course, index) => (
+              <TableRow key={course.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                <TableCell
+                  className="py-4 px-4 text-gray-900"
+                  style={{
+                    fontFamily: "DM Sans",
+                    fontWeight: 300,
+                    fontSize: "14px",
+                    lineHeight: "21px",
+                    letterSpacing: "0px",
+                  }}
+                >
+                  <div className="truncate max-w-[180px]" title={course.title}>
+                    {course.title}
+                  </div>
+                </TableCell>
+                <TableCell className="py-4 px-4">
+                  <Badge
+                    variant="secondary"
+                    className={`px-2 py-1 text-xs font-medium rounded-full border-0 whitespace-nowrap ${
+                      course.status === "Published" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                    }`}
+                  >
+                    {course.status}
+                  </Badge>
+                </TableCell>
+                <TableCell className="py-4 px-4 text-gray-600 text-sm whitespace-nowrap">{course.price}</TableCell>
+                <TableCell className="py-4 px-4 text-gray-600 text-sm">
+                  <div className="truncate" title={course.category}>
+                    {course.category}
+                  </div>
+                </TableCell>
+                <TableCell className="py-4 px-4 text-gray-600 text-sm">
+                  <div className="truncate max-w-[130px]" title={course.tags}>
+                    {course.tags}
+                  </div>
+                </TableCell>
+                <TableCell className="py-4 px-4 text-gray-600 text-sm text-center">{course.studentsEnrolled}</TableCell>
+                <TableCell className="py-4 px-4 text-gray-600 text-sm whitespace-nowrap">
+                  {course.lastUpdated}
+                </TableCell>
+                <TableCell className="py-4 px-4">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-8 h-8 p-0 hover:bg-gray-100 rounded-md">
+                        <MoreHorizontal className="w-4 h-4 text-gray-500" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-40 rounded-lg shadow-lg border border-gray-100">
+                      <DropdownMenuItem
+                        onClick={() => handleEdit(course.id)}
+                        className="text-sm text-gray-700 hover:bg-gray-50 rounded-md"
+                      >
+                        Edit course
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleDelete(course.id)}
+                        className="text-sm text-red-600 hover:bg-red-50 rounded-md"
+                      >
+                        Delete course
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }

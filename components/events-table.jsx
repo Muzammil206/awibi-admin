@@ -39,9 +39,43 @@ export function EventsTable() {
         <TableBody>
           {events.map((event) => (
             <TableRow key={event.id}>
-              <TableCell className="font-medium text-gray-900">{event.name}</TableCell>
-              <TableCell className="text-gray-600">{event.date}</TableCell>
-              <TableCell className="text-gray-600">{event.location}</TableCell>
+              <TableCell
+                className="font-medium"
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {event.name}
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {event.date}
+              </TableCell>
+              <TableCell
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 300,
+                  fontSize: "14px",
+                  lineHeight: "21px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {event.location}
+              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

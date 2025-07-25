@@ -23,7 +23,7 @@ export function RecentSalesTable() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-gray-600">Book Title</TableHead>
+            <TableHead className="text-gray-600 ">Book Title</TableHead>
             <TableHead className="text-gray-600">Quantity Sold</TableHead>
             <TableHead className="text-gray-600">Revenue</TableHead>
             <TableHead className="text-gray-600">Date</TableHead>
@@ -33,10 +33,58 @@ export function RecentSalesTable() {
         <TableBody>
           {recentSales.map((sale) => (
             <TableRow key={sale.id}>
-              <TableCell className="font-medium text-gray-900">{sale.bookTitle}</TableCell>
-              <TableCell className="text-gray-600">{sale.quantitySold}</TableCell>
-              <TableCell className="text-gray-600">{sale.revenue}</TableCell>
-              <TableCell className="text-gray-600">{sale.date}</TableCell>
+              <TableCell
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 300,
+                  fontStyle: 'normal',
+                  fontSize: '14px',
+                  lineHeight: '21px',
+                  letterSpacing: '0px',
+                }}
+                className="text-gray-900"
+              >
+                {sale.bookTitle}
+              </TableCell>
+              <TableCell
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 300,
+                  fontStyle: 'normal',
+                  fontSize: '14px',
+                  lineHeight: '21px',
+                  letterSpacing: '0px',
+                }}
+                className="text-gray-600"
+              >
+                {sale.quantitySold}
+              </TableCell>
+              <TableCell
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 300,
+                  fontStyle: 'normal',
+                  fontSize: '14px',
+                  lineHeight: '21px',
+                  letterSpacing: '0px',
+                }}
+                className="text-gray-600"
+              >
+                {sale.revenue}
+              </TableCell>
+              <TableCell
+                style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 300,
+                  fontStyle: 'normal',
+                  fontSize: '14px',
+                  lineHeight: '21px',
+                  letterSpacing: '0px',
+                }}
+                className="text-gray-600"
+              >
+                {sale.date}
+              </TableCell>
               <TableCell>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

@@ -73,7 +73,16 @@ export function UsersTable() {
                 className="cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => handleUserClick(user)}
               >
-                <TableCell>
+                <TableCell
+                  style={{
+                    fontFamily: 'Kumbh Sans, sans-serif',
+                    fontWeight: 300,
+                    fontStyle: 'normal',
+                    fontSize: '12px',
+                    lineHeight: '100%',
+                    letterSpacing: '0%',
+                  }}
+                >
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
                       <Image
@@ -89,10 +98,55 @@ export function UsersTable() {
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="text-gray-600">{user.email}</TableCell>
-                <TableCell className="text-gray-600">{user.phone}</TableCell>
-                <TableCell className="text-gray-600">{user.courses}</TableCell>
-                <TableCell>
+                <TableCell
+                  style={{
+                    fontFamily: 'Kumbh Sans, sans-serif',
+                    fontWeight: 300,
+                    fontStyle: 'normal',
+                    fontSize: '12px',
+                    lineHeight: '100%',
+                    letterSpacing: '0%',
+                  }}
+                  className="text-gray-600"
+                >
+                  {user.email}
+                </TableCell>
+                <TableCell
+                  style={{
+                    fontFamily: 'Kumbh Sans, sans-serif',
+                    fontWeight: 300,
+                    fontStyle: 'normal',
+                    fontSize: '12px',
+                    lineHeight: '100%',
+                    letterSpacing: '0%',
+                  }}
+                  className="text-gray-600"
+                >
+                  {user.phone}
+                </TableCell>
+                <TableCell
+                  style={{
+                    fontFamily: 'Kumbh Sans, sans-serif',
+                    fontWeight: 300,
+                    fontStyle: 'normal',
+                    fontSize: '12px',
+                    lineHeight: '100%',
+                    letterSpacing: '0%',
+                  }}
+                  className="text-gray-600"
+                >
+                  {user.courses}
+                </TableCell>
+                <TableCell
+                  style={{
+                    fontFamily: 'Kumbh Sans, sans-serif',
+                    fontWeight: 300,
+                    fontStyle: 'normal',
+                    fontSize: '12px',
+                    lineHeight: '100%',
+                    letterSpacing: '0%',
+                  }}
+                >
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="ghost" size="sm" className="w-8 h-8 p-0">

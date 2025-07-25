@@ -1,7 +1,6 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import Image from "next/image"
 import { LayoutDashboard, BookOpen, Users, Settings, BarChart2, LogOut, FolderOpen } from "lucide-react"
 
 import {
@@ -32,17 +31,17 @@ export function AppSidebar({ ...props }) {
     },
     {
       title: "Resources",
-      href: "/resources", // Assuming a resources page
+      href: "/resources",
       icon: FolderOpen,
     },
     {
       title: "Users",
-      href: "/users", // Assuming a users page
+      href: "/users",
       icon: Users,
     },
     {
       title: "Analytics",
-      href: "/analytics", // Assuming an analytics page
+      href: "/analytics",
       icon: BarChart2,
     },
     {
@@ -53,28 +52,31 @@ export function AppSidebar({ ...props }) {
   ]
 
   return (
-    <Sidebar {...props}>
-      <SidebarHeader className="p-4">
-        <Link href="/" className="flex items-center space-x-2">
-          <Image src="/logo.png" width={40} height={40} alt="Logo" />
+    <Sidebar {...props} className="border-r border-gray-200">
+      <SidebarHeader className="p-6 border-b border-gray-100">
+        <Link href="/" className="flex items-center space-x-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
+            <div className="w-7 h-7 bg-white rounded-full opacity-90"></div>
+          </div>
           <div>
             <span className="text-xl font-bold text-gray-900">Awibi</span>
-            <div className="text-sm text-gray-600">Institute</div>
+            <div className="text-sm text-gray-600 font-medium">Institute</div>
           </div>
         </Link>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-4 py-6">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-2">
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={pathname === item.href}>
-                    <Link
-                      href={item.href}
-                      className={pathname === item.href ? "bg-[#669933] text-[#669933] hover:bg-[#5a8a2e]" : ""}
-                    >
-                      <item.icon />
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === item.href}
+                    className="h-12 px-4 rounded-xl font-medium transition-all duration-200 hover:bg-green-50 hover:text-green-700 data-[active=true]:bg-gradient-to-r data-[active=true]:from-green-500 data-[active=true]:to-green-600 data-[active=true]:text-white data-[active=true]:shadow-lg"
+                  >
+                    <Link href={item.href} className="flex items-center gap-3">
+                      <item.icon className="w-5 h-5" />
                       <span>{item.title}</span>
                     </Link>
                   </SidebarMenuButton>
@@ -85,13 +87,16 @@ export function AppSidebar({ ...props }) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarRail />
-      <SidebarGroup className="mt-auto p-4">
+      <SidebarGroup className="mt-auto p-4 border-t border-gray-100">
         <SidebarGroupContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <Link href="/logout">
-                  <LogOut />
+              <SidebarMenuButton
+                asChild
+                className="h-12 px-4 rounded-xl font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200"
+              >
+                <Link href="/logout" className="flex items-center gap-3">
+                  <LogOut className="w-5 h-5" />
                   <span>Logout</span>
                 </Link>
               </SidebarMenuButton>
