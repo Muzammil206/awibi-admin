@@ -19,26 +19,22 @@ export default function UsersPage() {
           <Separator orientation="vertical" className="mr-2 h-4" />
           <div className="flex flex-col">
             <h1 className="text-2xl font-bold text-gray-900">Users</h1>
-            <p className="text-gray-600 text-sm">Manage your courses and track student progress.</p>
+            <p className="text-gray-600 text-sm">Manage users and track their activity.</p>
           </div>
         </header>
 
         <main className="flex-1 p-8 bg-gray-50">
-          {/* Filter Tabs */}
           <div className="flex items-center justify-between mb-6">
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="flex-grow">
               <TabsList className="grid w-full grid-cols-3 h-10">
                 <TabsTrigger value="all-users">All Users</TabsTrigger>
-                <TabsTrigger value="enrolled-users">Enrolled Users</TabsTrigger>
-                <TabsTrigger value="unenrolled-users">Unenrolled Users</TabsTrigger>
+                <TabsTrigger value="admin-users">Admins</TabsTrigger>
+                <TabsTrigger value="student-users">Students</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
 
-          {/* Users Table */}
           <UsersTable />
-
-          {/* Pagination */}
           <Pagination />
         </main>
       </SidebarInset>

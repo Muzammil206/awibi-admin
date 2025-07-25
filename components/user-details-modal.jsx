@@ -1,209 +1,107 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { X, Camera } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useUserStore } from "@/lib/users-store"
-import { toast } from "sonner"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { User, Mail, Calendar, Shield } from "lucide-react"
 import Image from "next/image"
 
 export function UserDetailsModal({ user, isOpen, onClose, onNudge, onSuspend, onDeactivate }) {
-  const updateUser = useUserStore((state) => state.updateUser)
-
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    courses: "",
-    avatar: "",
-  })
-
-  const [isEditing, setIsEditing] = useState(false) // State to manage edit mode
-  const [errors, setErrors] = useState({})
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        courses: user.courses !== undefined ? String(user.courses) : "",
-        avatar: user.avatar || "/placeholder.svg?height=100&width=100",
-      })
-      setIsEditing(false) // Reset edit mode when user changes
-    }
-  }, [user])
-
   if (!user) return null
-
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: "" }))
-    }
-  }
-
-  const handleSave = () => {
-    const newErrors = {}
-    if (!formData.firstName.trim()) newErrors.firstName = "First Name is required"
-    if (!formData.lastName.trim()) newErrors.lastName = "Last Name is required"
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email address"
-    }
-    if (!formData.phone.trim()) newErrors.phone = "Phone Number is required"
-    if (!formData.courses.trim()) {
-      newErrors.courses = "Courses is required"
-    } else if (isNaN(Number.parseInt(formData.courses))) {
-      newErrors.courses = "Invalid number of courses"
-    }
-
-    setErrors(newErrors)
-
-    if (Object.keys(newErrors).length === 0) {
-      updateUser(user.id, {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        phone: formData.phone,
-        courses: Number.parseInt(formData.courses),
-        avatar: formData.avatar,
-      })
-      toast.success("User details updated successfully!")
-      setIsEditing(false)
-    } else {
-      toast.error("Please correct the errors in the form.")
-    }
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto p-6">
-        <DialogHeader className="flex flex-row items-center justify-between pb-4">
-          <DialogTitle className="text-2xl font-bold text-gray-900">User Details</DialogTitle>
-          <Button variant="ghost" size="icon" onClick={onClose} className="p-0">
-            <X className="w-5 h-5 text-gray-500" />
-          </Button>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
+              <Image
+                src={user.avatar || "/placeholder.svg?height=48&width=48&query=user avatar"}
+                alt={user.firstName}
+                width={48}
+                height={48}
+                className="object-cover"
+              />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900">
+                {user.firstName} {user.lastName}
+              </h3>
+              <Badge
+                variant="secondary"
+                className={`mt-1 ${
+                  user.role === "admin" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
+                }`}
+              >
+                {user.role}
+              </Badge>
+            </div>
+          </DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col items-center space-y-6">
-          {/* Avatar */}
-          <div className="relative w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-            <Image
-              src={formData.avatar || "/placeholder.svg?height=96&width=96&query=user avatar"}
-              alt="User Avatar"
-              width={96}
-              height={96}
-              className="object-cover"
-            />
-            {isEditing && (
-              <button className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 text-white rounded-full">
-                <Camera className="w-6 h-6" />
-              </button>
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Mail className="w-5 h-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Email</p>
+                <p className="text-sm text-gray-600">{user.email}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <User className="w-5 h-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Username</p>
+                <p className="text-sm text-gray-600">{user.firstName}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Shield className="w-5 h-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Role</p>
+                <p className="text-sm text-gray-600 capitalize">{user.role}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Calendar className="w-5 h-5 text-gray-400" />
+              <div>
+                <p className="text-sm font-medium text-gray-900">Member Since</p>
+                <p className="text-sm text-gray-600">{new Date(user.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+
+            {user.bio && (
+              <div>
+                <p className="text-sm font-medium text-gray-900 mb-2">Bio</p>
+                <p className="text-sm text-gray-600">{user.bio}</p>
+              </div>
             )}
           </div>
 
-          {/* Form Fields */}
-          <div className="w-full space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange("firstName", e.target.value)}
-                disabled={!isEditing}
-                className={errors.firstName ? "border-red-500" : ""}
-              />
-              {errors.firstName && <p className="text-sm text-red-600">{errors.firstName}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange("lastName", e.target.value)}
-                disabled={!isEditing}
-                className={errors.lastName ? "border-red-500" : ""}
-              />
-              {errors.lastName && <p className="text-sm text-red-600">{errors.lastName}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                disabled={!isEditing}
-                className={errors.email ? "border-red-500" : ""}
-              />
-              {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                disabled={!isEditing}
-                className={errors.phone ? "border-red-500" : ""}
-              />
-              {errors.phone && <p className="text-sm text-red-600">{errors.phone}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="courses">Courses</Label>
-              <Input
-                id="courses"
-                type="number"
-                value={formData.courses}
-                onChange={(e) => handleInputChange("courses", e.target.value)}
-                disabled={!isEditing}
-                className={errors.courses ? "border-red-500" : ""}
-              />
-              {errors.courses && <p className="text-sm text-red-600">{errors.courses}</p>}
+          <Separator />
+
+          <div className="flex flex-col gap-2">
+            <h4 className="text-sm font-medium text-gray-900">Actions</h4>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" size="sm" onClick={() => onNudge(user)}>
+                Send Nudge
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onSuspend(user)}>
+                Suspend User
+              </Button>
+              <Button variant="destructive" size="sm" onClick={() => onDeactivate(user)}>
+                Deactivate
+              </Button>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="w-full space-y-3 pt-4 border-t border-gray-200">
-            {isEditing ? (
-              <Button onClick={handleSave} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                Save Changes
-              </Button>
-            ) : (
-              <Button onClick={() => setIsEditing(true)} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
-                Edit Details
-              </Button>
-            )}
-
-            <Button
-              onClick={() => onNudge(user)}
-              className="w-full bg-green-500 hover:bg-green-600 text-white"
-              disabled={isEditing}
-            >
-              Nudge
-            </Button>
-            <Button
-              onClick={() => onSuspend(user)}
-              variant="outline"
-              className="w-full border-red-300 text-red-600 hover:bg-red-50 bg-transparent"
-              disabled={isEditing}
-            >
-              Suspend
-            </Button>
-            <Button
-              onClick={() => onDeactivate(user)}
-              variant="outline"
-              className="w-full border-red-300 text-red-600 hover:bg-red-50 bg-transparent"
-              disabled={isEditing}
-            >
-              Deactivate
+          <div className="flex justify-end pt-4">
+            <Button variant="outline" onClick={onClose}>
+              Close
             </Button>
           </div>
         </div>

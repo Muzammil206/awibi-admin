@@ -1,6 +1,7 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import Image from "next/image"
 import { LayoutDashboard, BookOpen, Users, Settings, BarChart2, LogOut, FolderOpen } from "lucide-react"
 
 import {
@@ -55,9 +56,13 @@ export function AppSidebar({ ...props }) {
     <Sidebar {...props} className="border-r border-gray-200">
       <SidebarHeader className="p-6 border-b border-gray-100">
         <Link href="/" className="flex items-center space-x-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
-            <div className="w-7 h-7 bg-white rounded-full opacity-90"></div>
-          </div>
+          <Image
+            src="/logo.png"
+            alt="Awibi Logo"
+            width={40}
+            height={40}
+            className="rounded-full"
+          />
           <div>
             <span className="text-xl font-bold text-gray-900">Awibi</span>
             <div className="text-sm text-gray-600 font-medium">Institute</div>
@@ -73,7 +78,7 @@ export function AppSidebar({ ...props }) {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname === item.href}
-                    className="h-12 px-4 rounded-xl font-medium transition-all duration-200 hover:bg-green-50 hover:text-green-700 data-[active=true]:bg-gradient-to-r data-[active=true]:from-green-500 data-[active=true]:to-green-600 data-[active=true]:text-white data-[active=true]:shadow-lg"
+                    className="h-12 px-4 rounded-xl font-medium transition-all duration-200 hover:bg-green-40 data-[active=true]:text-[#669933] data-[active=true]:shadow-lg"
                   >
                     <Link href={item.href} className="flex items-center gap-3">
                       <item.icon className="w-5 h-5" />
