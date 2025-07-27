@@ -3,7 +3,7 @@
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { StatsCards } from "@/components/stats-cards"
-import { StatisticsChart } from "@/components/statistics-chart"
+import { AnalyticsStatisticsChart } from "@/components/analytics-statistics-chart"
 import { ActivityFeed } from "@/components/activity-feed"
 import { TopCoursesTable } from "@/components/top-courses-table"
 import { Separator } from "@/components/ui/separator"
@@ -29,7 +29,7 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column - Charts and Tables */}
             <div className="lg:col-span-2 space-y-8">
-              <StatisticsChart />
+              <AnalyticsStatisticsChart />
               <TopCoursesTable />
             </div>
 

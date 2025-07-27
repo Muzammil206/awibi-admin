@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { MoreHorizontal } from "lucide-react"
@@ -8,19 +9,70 @@ import { useCourseStore } from "@/lib/course-store"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { toast } from "sonner"
 
-export function CoursesTable() {
-  const { getFilteredCourses, deleteCourse } = useCourseStore()
-  const courses = getFilteredCourses()
+const formatDate = (dateString) => {
+  if (!dateString) return 'Not available';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    return date.toISOString().split('T')[0];
+  } catch (error) {
+    return 'Invalid date';
+  }
+};
 
-  const handleDelete = (courseId) => {
+export function CoursesTable() {
+  const { getFilteredCourses, deleteCourse, fetchCourses } = useCourseStore()
+  const [isClient, setIsClient] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadCourses = async () => {
+      setIsLoading(true)
+      try {
+        await fetchCourses()
+      } catch (error) {
+        console.error('Error fetching courses:', error)
+        toast.error('Failed to load courses')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    setIsClient(true)
+    loadCourses()
+  }, [fetchCourses])
+
+  const courses = getFilteredCourses()?.filter(course => course != null) || []
+
+  const handleDelete = async (courseId) => {
     if (confirm("Are you sure you want to delete this course?")) {
-      deleteCourse(courseId)
-      toast.success("Course deleted successfully")
+      const success = await deleteCourse(courseId)
+      if (success) {
+        toast.success("Course deleted successfully")
+      } else {
+        toast.error("Failed to delete course")
+      }
     }
   }
 
   const handleEdit = (courseId) => {
     toast.info(`Edit functionality for course ${courseId} coming soon!`)
+  }
+
+  if (!isClient || isLoading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 text-lg">Loading courses...</p>
+      </div>
+    )
+  }
+
+  if (!Array.isArray(courses)) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500 text-lg">Error loading courses. Please try again.</p>
+      </div>
+    )
   }
 
   if (courses.length === 0) {
@@ -49,12 +101,15 @@ export function CoursesTable() {
           </TableHeader>
           <TableBody>
             {courses.map((course, index) => (
-              <TableRow key={course.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <TableRow 
+                key={`course-${course._id || course.id || index}`} 
+                className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+              >
                 <TableCell
                   className="py-4 px-4 text-gray-900"
                   style={{
                     fontFamily: "DM Sans",
-                    fontWeight: 300,
+                    fontWeight: 250,
                     fontSize: "14px",
                     lineHeight: "21px",
                     letterSpacing: "0px",
@@ -68,26 +123,26 @@ export function CoursesTable() {
                   <Badge
                     variant="secondary"
                     className={`px-2 py-1 text-xs font-medium rounded-full border-0 whitespace-nowrap ${
-                      course.status === "Published" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                      course.status === "published" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
                     }`}
                   >
-                    {course.status}
+                    {course.status === "published" ? "Published" : "Draft"}
                   </Badge>
                 </TableCell>
-                <TableCell className="py-4 px-4 text-gray-600 text-sm whitespace-nowrap">{course.price}</TableCell>
+                <TableCell className="py-4 px-4 text-gray-600 text-sm whitespace-nowrap">₦{course.price || '0.00'}</TableCell>
                 <TableCell className="py-4 px-4 text-gray-600 text-sm">
-                  <div className="truncate" title={course.category}>
-                    {course.category}
+                  <div className="truncate" title={course.category?.name}>
+                    {course.category?.name || 'Uncategorized'}
                   </div>
                 </TableCell>
                 <TableCell className="py-4 px-4 text-gray-600 text-sm">
                   <div className="truncate max-w-[130px]" title={course.tags}>
-                    {course.tags}
+                    {course.tags || 'No tags'}
                   </div>
                 </TableCell>
-                <TableCell className="py-4 px-4 text-gray-600 text-sm text-center">{course.studentsEnrolled}</TableCell>
+                <TableCell className="py-4 px-4 text-gray-600 text-sm text-center">{course.studentsEnrolled || 0}</TableCell>
                 <TableCell className="py-4 px-4 text-gray-600 text-sm whitespace-nowrap">
-                  {course.lastUpdated}
+                  {formatDate(course.updatedAt)}
                 </TableCell>
                 <TableCell className="py-4 px-4">
                   <DropdownMenu>
@@ -98,13 +153,13 @@ export function CoursesTable() {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-40 rounded-lg shadow-lg border border-gray-100">
                       <DropdownMenuItem
-                        onClick={() => handleEdit(course.id)}
+                        onClick={() => handleEdit(course._id)}
                         className="text-sm text-gray-700 hover:bg-gray-50 rounded-md"
                       >
                         Edit course
                       </DropdownMenuItem>
                       <DropdownMenuItem
-                        onClick={() => handleDelete(course.id)}
+                        onClick={() => handleDelete(course._id)}
                         className="text-sm text-red-600 hover:bg-red-50 rounded-md"
                       >
                         Delete course

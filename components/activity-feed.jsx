@@ -9,7 +9,7 @@ export function ActivityFeed() {
       user: "@DercoMani",
       time: "2 mins ago",
       description: 'Enrolled for "The Study of the Human Mind"',
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: "/image.svg?height=40&width=40",
       hasDot: true,
     },
     {
@@ -17,7 +17,7 @@ export function ActivityFeed() {
       user: "@MiaMore",
       time: "9 mins ago",
       description: "Just registered",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: "/image.svg?height=40&width=40",
       hasDot: false,
     },
     {
@@ -25,7 +25,7 @@ export function ActivityFeed() {
       user: "@RinaMenol",
       time: "11 mins ago",
       description: "Started following you",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: "/image.svg?height=40&width=40",
       hasDot: false,
     },
     {
@@ -33,7 +33,7 @@ export function ActivityFeed() {
       user: "@CoryToms",
       time: "23 mins ago",
       description: "Started a new course",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: "/image.svg?height=40&width=40",
       hasDot: false,
     },
     {
@@ -41,7 +41,7 @@ export function ActivityFeed() {
       user: "@IngaV",
       time: "28 mins ago",
       description: "Started a new course",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: "/image.svg?height=40&width=40",
       hasDot: false,
     },
     {
@@ -49,7 +49,7 @@ export function ActivityFeed() {
       user: "@HouseHoleJohn",
       time: "33 mins ago",
       description: "Started a new course",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: "/image.svg?height=40&width=40",
       hasDot: false,
     },
   ]
@@ -78,11 +78,23 @@ export function ActivityFeed() {
               )}
             </div>
             <div>
-              <p className="text-sm text-gray-900">
+              <p className="text-gray-900" style={{
+                fontFamily: "Inter",
+                fontSize: "10px",
+                fontWeight: 300,
+                lineHeight: "100%",
+                letterSpacing: "0.23px"
+              }}>
                 <span className="font-medium">{activity.user}</span>{" "}
                 <span className="text-gray-500">{activity.time}</span>
               </p>
-              <p className="text-sm text-gray-600">{activity.description}</p>
+              <p className="text-gray-600" style={{
+                fontFamily: "Inter",
+                fontSize: "10px",
+                fontWeight: 300,
+                lineHeight: "100%",
+                letterSpacing: "0.23px"
+              }}>{activity.description}</p>
             </div>
           </div>
         ))}

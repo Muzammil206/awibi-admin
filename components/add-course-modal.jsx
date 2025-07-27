@@ -18,17 +18,28 @@ export function AddCourseModal({ isOpen, onClose }) {
 
   const [formData, setFormData] = useState({
     title: "",
-    category: "",
     description: "",
-    educator: "",
-    courseDuration: "",
+    category_id: "", // Will need to fetch categories from backend
     price: "",
-    discount: "10%", // Default from image
-    moduleTitle: "",
-    moduleDescription: "",
-    moduleContent: "", // Placeholder for upload
-    isFreeCourse: false,
-    image: null,
+    summary: "",
+    discounted_price: "",
+    duration: "",
+    level: "beginner",
+    thumbnail_url: null,
+    instructor_name: "",
+    is_published: false,
+    modules: [{
+      title: "",
+      description: "",
+      is_published: true,
+      contents: [{
+        content_type: "video",
+        title: "",
+        description: "",
+        video_url: "",
+        is_published: true
+      }]
+    }]
   })
 
   const [errors, setErrors] = useState({})
@@ -67,12 +78,24 @@ export function AddCourseModal({ isOpen, onClose }) {
     const newErrors = {}
 
     if (!formData.title.trim()) newErrors.title = "Course title is required"
-    if (!formData.category) newErrors.category = "Category is required"
+    if (!formData.category_id) newErrors.category_id = "Category is required"
     if (!formData.description.trim()) newErrors.description = "Description is required"
-    if (!formData.educator.trim()) newErrors.educator = "Educator is required"
-    if (!formData.courseDuration.trim()) newErrors.courseDuration = "Course duration is required"
-    if (!formData.price.trim() && !formData.isFreeCourse) newErrors.price = "Price is required for paid courses"
-    if (formData.price.trim() && isNaN(Number.parseFloat(formData.price))) newErrors.price = "Invalid price"
+    if (!formData.instructor_name.trim()) newErrors.instructor_name = "Instructor name is required"
+    if (!formData.duration) newErrors.duration = "Course duration is required"
+    if (!formData.price && formData.price !== 0) newErrors.price = "Price is required"
+    if (formData.price && isNaN(Number(formData.price))) newErrors.price = "Invalid price"
+    if (!formData.summary.trim()) newErrors.summary = "Summary is required"
+    
+    // Validate modules
+    const moduleErrors = formData.modules.some(module => {
+      return !module.title.trim() || !module.description.trim() || 
+        module.contents.some(content => !content.title.trim() || !content.description.trim() || !content.video_url.trim())
+    })
+    
+    if (moduleErrors) {
+      newErrors.modules = "All modules and their contents must be filled out"
+      toast.error("Please complete all module and content information")
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -87,25 +110,92 @@ export function AddCourseModal({ isOpen, onClose }) {
     setIsSubmitting(true)
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      // Generate a slug from the title
+      const slug = formData.title
+        .toLowerCase()
+        .replace(/ /g, '-')
+        .replace(/[^\w-]+/g, '')
 
-      const newCourse = {
+      const courseData = {
         title: formData.title,
-        category: formData.category,
         description: formData.description,
-        educator: formData.educator,
-        courseDuration: formData.courseDuration,
-        price: formData.isFreeCourse ? "0.00" : formData.price,
-        discount: formData.discount,
-        modules: formData.moduleTitle
-          ? [{ title: formData.moduleTitle, description: formData.moduleDescription, content: formData.moduleContent }]
-          : [],
-        isFreeCourse: formData.isFreeCourse,
-        image: imagePreview, // Use the base64 image preview for now
-        status: status,
-        instructor: formData.educator, // Map educator to instructor for existing CourseCard/Table
-        tags: "", // Default empty, can be expanded
+        category_id: formData.category_id,
+        price: Number(formData.price),
+        slug: slug,
+        summary: formData.summary,
+        discounted_price: Number(formData.discounted_price),
+        duration: Number(formData.duration),
+        level: formData.level,
+        thumbnail_url: imagePreview, // This should be updated to use actual uploaded image URL
+        instructor_name: formData.instructor_name,
+        is_published: status === "Published",
+        modules: formData.modules.map(module => ({
+          title: module.title,
+          description: module.description,
+          is_published: true,
+          contents: module.contents.map(content => ({
+            content_type: content.content_type,
+            title: content.title,
+            description: content.description,
+            video_url: content.video_url,
+            is_published: true
+          }))
+        }))
       }
+
+      // Get auth token
+      const token = localStorage.getItem("authToken")
+      if (!token) {
+        throw new Error("No authentication token available. Please login first.")
+      }
+
+      // Make API call to backend
+      const response = await fetch('http://localhost:3000/api/v1/courses', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(courseData)
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error("Authentication failed. Please login again.")
+        }
+        throw new Error(`Failed to create course: ${response.status}`)
+      }
+
+      toast.success(`Course ${status === "Published" ? "published" : "drafted"} successfully!`)
+      onClose()
+
+      // Reset form
+      setFormData({
+        title: "",
+        description: "",
+        category_id: "",
+        price: "",
+        summary: "",
+        discounted_price: "",
+        duration: "",
+        level: "beginner",
+        thumbnail_url: null,
+        instructor_name: "",
+        is_published: false,
+        modules: [{
+          title: "",
+          description: "",
+          is_published: true,
+          contents: [{
+            content_type: "video",
+            title: "",
+            description: "",
+            video_url: "",
+            is_published: true
+          }]
+        }]
+      })
+      setImagePreview(null)
 
       addCourse(newCourse)
 
@@ -137,7 +227,10 @@ export function AddCourseModal({ isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6">
+      <DialogContent 
+        className="max-w-4xl max-h-[90vh] overflow-y-auto p-6"
+        description="Form to add a new course to the platform. Fill in course details including title, category, description, educator information, and pricing."
+      >
         <DialogHeader className="flex flex-row items-center justify-between pb-4">
           <DialogTitle className="text-2xl font-bold text-gray-900">Course Details</DialogTitle>
           <Button variant="ghost" size="icon" onClick={onClose} className="p-0">
@@ -198,10 +291,10 @@ export function AddCourseModal({ isOpen, onClose }) {
           {/* Course Title and Category */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="title">Course title</Label>
+              <Label htmlFor="title">Course Title</Label>
               <Input
                 id="title"
-                placeholder="Course title"
+                placeholder="Enter course title"
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
                 className={errors.title ? "border-red-500" : ""}
@@ -211,135 +304,268 @@ export function AddCourseModal({ isOpen, onClose }) {
 
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)}>
-                <SelectTrigger className={errors.category ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Category" />
+              <Select value={formData.category_id} onValueChange={(value) => handleInputChange("category_id", value)}>
+                <SelectTrigger className={errors.category_id ? "border-red-500" : ""}>
+                  <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Design">Design</SelectItem>
-                  <SelectItem value="Development">Development</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Business">Business</SelectItem>
-                  <SelectItem value="Analytics">Analytics</SelectItem>
-                  <SelectItem value="Programming">Programming</SelectItem>
-                  <SelectItem value="Mobile Dev">Mobile Dev</SelectItem>
-                  <SelectItem value="Cloud Computing">Cloud Computing</SelectItem>
-                  <SelectItem value="Cybersecurity">Cybersecurity</SelectItem>
+                  <SelectItem value="444d3f42-44ec-45dd-985e-e007860ff7ce">Programming</SelectItem>
+                  {/* Add other categories with their UUIDs */}
                 </SelectContent>
               </Select>
-              {errors.category && <p className="text-sm text-red-600">{errors.category}</p>}
+              {errors.category_id && <p className="text-sm text-red-600">{errors.category_id}</p>}
             </div>
           </div>
 
-          {/* Description */}
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <div className="relative">
+          {/* Description and Summary */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                placeholder="About course"
+                placeholder="Detailed course description"
                 value={formData.description}
                 onChange={(e) => handleInputChange("description", e.target.value)}
                 className={`min-h-[100px] resize-none ${errors.description ? "border-red-500" : ""}`}
-                maxLength={100}
               />
-              <div className="absolute bottom-2 right-2 text-xs text-gray-500">{formData.description.length}/100</div>
-            </div>
-            {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
-          </div>
-
-          {/* Educator and Course Duration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="educator">Educator</Label>
-              <Input
-                id="educator"
-                placeholder="Educator"
-                value={formData.educator}
-                onChange={(e) => handleInputChange("educator", e.target.value)}
-                className={errors.educator ? "border-red-500" : ""}
-              />
-              {errors.educator && <p className="text-sm text-red-600">{errors.educator}</p>}
+              {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="courseDuration">Course Duration</Label>
-              <Input
-                id="courseDuration"
-                placeholder="No. of modules"
-                value={formData.courseDuration}
-                onChange={(e) => handleInputChange("courseDuration", e.target.value)}
-                className={errors.courseDuration ? "border-red-500" : ""}
+              <Label htmlFor="summary">Summary</Label>
+              <Textarea
+                id="summary"
+                placeholder="Brief course summary"
+                value={formData.summary}
+                onChange={(e) => handleInputChange("summary", e.target.value)}
+                className="min-h-[100px] resize-none"
               />
-              {errors.courseDuration && <p className="text-sm text-red-600">{errors.courseDuration}</p>}
             </div>
           </div>
 
-          {/* Price and Discount */}
+          {/* Instructor and Level */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="price">Price</Label>
+              <Label htmlFor="instructor_name">Instructor Name</Label>
+              <Input
+                id="instructor_name"
+                placeholder="Enter instructor name"
+                value={formData.instructor_name}
+                onChange={(e) => handleInputChange("instructor_name", e.target.value)}
+                className={errors.instructor_name ? "border-red-500" : ""}
+              />
+              {errors.instructor_name && <p className="text-sm text-red-600">{errors.instructor_name}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="level">Course Level</Label>
+              <Select value={formData.level} onValueChange={(value) => handleInputChange("level", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="beginner">Beginner</SelectItem>
+                  <SelectItem value="intermediate">Intermediate</SelectItem>
+                  <SelectItem value="advanced">Advanced</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          {/* Duration and Price */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="duration">Duration (minutes)</Label>
+              <Input
+                id="duration"
+                type="number"
+                placeholder="Enter course duration"
+                value={formData.duration}
+                onChange={(e) => handleInputChange("duration", e.target.value)}
+                className={errors.duration ? "border-red-500" : ""}
+              />
+              {errors.duration && <p className="text-sm text-red-600">{errors.duration}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price">Price ($)</Label>
               <Input
                 id="price"
-                placeholder="0.00"
+                type="number"
+                step="0.01"
+                placeholder="Enter course price"
                 value={formData.price}
-                onChange={(e) => handleInputChange("price", e.target.value)}
+                onChange={(e) => handleInputChange("price", Number(e.target.value))}
                 className={errors.price ? "border-red-500" : ""}
-                disabled={formData.isFreeCourse}
               />
               {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="discount">Discount</Label>
-              <Input
-                id="discount"
-                placeholder="10%"
-                value={formData.discount}
-                onChange={(e) => handleInputChange("discount", e.target.value)}
-              />
-            </div>
+          {/* Discounted Price */}
+          <div className="space-y-2">
+            <Label htmlFor="discounted_price">Discounted Price ($)</Label>
+            <Input
+              id="discounted_price"
+              type="number"
+              step="0.01"
+              placeholder="Enter discounted price"
+              value={formData.discounted_price}
+              onChange={(e) => handleInputChange("discounted_price", Number(e.target.value))}
+            />
           </div>
 
           {/* Module Section */}
           <div className="space-y-4 border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-semibold text-gray-900">Module</h3>
-            <div className="space-y-2">
-              <Label htmlFor="moduleTitle">Title</Label>
-              <Input
-                id="moduleTitle"
-                placeholder="Title"
-                value={formData.moduleTitle}
-                onChange={(e) => handleInputChange("moduleTitle", e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="moduleDescription">Module description</Label>
-              <Textarea
-                id="moduleDescription"
-                placeholder="Details"
-                value={formData.moduleDescription}
-                onChange={(e) => handleInputChange("moduleDescription", e.target.value)}
-                className="min-h-[80px] resize-none"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="moduleContent">Module content</Label>
-              <Input
-                id="moduleContent"
-                placeholder="Upload"
-                value={formData.moduleContent}
-                onChange={(e) => handleInputChange("moduleContent", e.target.value)}
-              />
-            </div>
-            <Button variant="outline" className="bg-transparent text-green-600 hover:bg-green-50">
-              Add Content
-            </Button>
-            <div className="border-t border-gray-200 pt-4">
-              <Button variant="outline" className="bg-transparent text-green-600 hover:bg-green-50">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-gray-900">Modules</h3>
+              <Button 
+                variant="outline" 
+                className="bg-transparent text-green-600 hover:bg-green-50"
+                onClick={() => {
+                  setFormData(prev => ({
+                    ...prev,
+                    modules: [...prev.modules, {
+                      title: "",
+                      description: "",
+                      is_published: true,
+                      contents: []
+                    }]
+                  }))
+                }}
+                type="button"
+              >
                 Add New Module
               </Button>
             </div>
+
+            {formData.modules.map((module, moduleIndex) => (
+              <div key={moduleIndex} className="space-y-4 border rounded-lg p-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-md font-medium">Module {moduleIndex + 1}</h4>
+                  {moduleIndex > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-500 hover:text-red-600"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          modules: prev.modules.filter((_, i) => i !== moduleIndex)
+                        }))
+                      }}
+                      type="button"
+                    >
+                      Remove Module
+                    </Button>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Module Title</Label>
+                  <Input
+                    value={module.title}
+                    onChange={(e) => {
+                      const newModules = [...formData.modules]
+                      newModules[moduleIndex].title = e.target.value
+                      setFormData(prev => ({ ...prev, modules: newModules }))
+                    }}
+                    placeholder="Enter module title"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Module Description</Label>
+                  <Textarea
+                    value={module.description}
+                    onChange={(e) => {
+                      const newModules = [...formData.modules]
+                      newModules[moduleIndex].description = e.target.value
+                      setFormData(prev => ({ ...prev, modules: newModules }))
+                    }}
+                    placeholder="Enter module description"
+                    className="min-h-[80px]"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-sm font-medium">Contents</h5>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-green-600 hover:bg-green-50"
+                      onClick={() => {
+                        const newModules = [...formData.modules]
+                        newModules[moduleIndex].contents.push({
+                          content_type: "video",
+                          title: "",
+                          description: "",
+                          video_url: "",
+                          is_published: true
+                        })
+                        setFormData(prev => ({ ...prev, modules: newModules }))
+                      }}
+                      type="button"
+                    >
+                      Add Content
+                    </Button>
+                  </div>
+
+                  {module.contents.map((content, contentIndex) => (
+                    <div key={contentIndex} className="space-y-3 border-l-2 border-gray-200 pl-4">
+                      <div className="flex items-center justify-between">
+                        <Label>Content {contentIndex + 1}</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-500 hover:text-red-600"
+                          onClick={() => {
+                            const newModules = [...formData.modules]
+                            newModules[moduleIndex].contents = module.contents.filter((_, i) => i !== contentIndex)
+                            setFormData(prev => ({ ...prev, modules: newModules }))
+                          }}
+                          type="button"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Input
+                          value={content.title}
+                          onChange={(e) => {
+                            const newModules = [...formData.modules]
+                            newModules[moduleIndex].contents[contentIndex].title = e.target.value
+                            setFormData(prev => ({ ...prev, modules: newModules }))
+                          }}
+                          placeholder="Content title"
+                        />
+                        <Textarea
+                          value={content.description}
+                          onChange={(e) => {
+                            const newModules = [...formData.modules]
+                            newModules[moduleIndex].contents[contentIndex].description = e.target.value
+                            setFormData(prev => ({ ...prev, modules: newModules }))
+                          }}
+                          placeholder="Content description"
+                          className="min-h-[60px]"
+                        />
+                        <Input
+                          value={content.video_url}
+                          onChange={(e) => {
+                            const newModules = [...formData.modules]
+                            newModules[moduleIndex].contents[contentIndex].video_url = e.target.value
+                            setFormData(prev => ({ ...prev, modules: newModules }))
+                          }}
+                          placeholder="Video URL"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Free Course Toggle */}

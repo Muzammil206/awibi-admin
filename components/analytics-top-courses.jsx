@@ -5,11 +5,40 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { MoreHorizontal } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useState, useEffect } from "react"
 import { useCourseStore } from "@/lib/course-store"
 import { toast } from "sonner"
 
+const formatDate = (dateString) => {
+  if (!dateString) return 'Not available';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    return date.toISOString().split('T')[0];
+  } catch (error) {
+    return 'Invalid date';
+  }
+};
+
 export function AnalyticsTopCourses() {
-  const { courses } = useCourseStore()
+  const { courses, fetchCourses } = useCourseStore()
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    const loadCourses = async () => {
+      setIsLoading(true)
+      try {
+        await fetchCourses()
+      } catch (error) {
+        console.error('Error fetching courses:', error)
+        toast.error('Failed to load courses')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadCourses()
+  }, [fetchCourses])
 
   const handleEdit = (courseId) => {
     toast.info(`Edit functionality for course ${courseId} coming soon!`)
@@ -23,6 +52,24 @@ export function AnalyticsTopCourses() {
 
   const handleAddProvider = () => {
     toast.info("Add Provider functionality coming soon!")
+  }
+
+  // Get top 5 courses sorted by student enrollment
+  const topCourses = [...(courses || [])]
+    // .filter(course => course && course.is_published === "True")
+    
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-lg font-semibold text-gray-900">Top Courses</h3>
+        </div>
+        <div className="bg-white rounded-lg border border-gray-100 p-8 text-center">
+          <p className="text-gray-500">Loading courses...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -53,8 +100,8 @@ export function AnalyticsTopCourses() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {courses.slice(0, 5).map((course) => (
-              <TableRow key={course.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+            {topCourses.map((course) => (
+              <TableRow key={`analytics-course-${course.id}`} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
                 <TableCell
                   style={{
                     fontFamily: 'DM Sans, sans-serif',
@@ -118,7 +165,7 @@ export function AnalyticsTopCourses() {
                   }}
                   className="py-4 px-4 text-gray-600 text-sm"
                 >
-                  {course.category}
+                  {course.category.name}
                 </TableCell>
                 <TableCell
                   style={{

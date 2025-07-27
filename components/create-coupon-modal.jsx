@@ -103,7 +103,10 @@ export function CreateCouponModal({ isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+      <DialogContent 
+        className="max-w-2xl max-h-[90vh] overflow-y-auto p-6"
+        description="Form to create a new discount coupon. Specify coupon details including code, discount value, validity period, and usage restrictions."
+      >
         <DialogHeader className="flex flex-row items-center justify-between pb-4">
           <DialogTitle className="text-2xl font-bold text-gray-900">Create Coupon</DialogTitle>
           <Button variant="ghost" size="icon" onClick={onClose} className="p-0">

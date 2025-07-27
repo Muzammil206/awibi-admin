@@ -2,106 +2,263 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
-import { User, Mail, Calendar, Shield } from "lucide-react"
-import Image from "next/image"
+import { Mail, Phone, Calendar, User, BookOpen } from "lucide-react"
 
 export function UserDetailsModal({ user, isOpen, onClose, onNudge, onSuspend, onDeactivate }) {
   if (!user) return null
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    })
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100">
-              <Image
-                src={user.avatar || "/placeholder.svg?height=48&width=48&query=user avatar"}
-                alt={user.firstName}
-                width={48}
-                height={48}
-                className="object-cover"
-              />
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold text-gray-900">
-                {user.firstName} {user.lastName}
-              </h3>
-              <Badge
-                variant="secondary"
-                className={`mt-1 ${
-                  user.role === "admin" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"
-                }`}
-              >
-                {user.role}
-              </Badge>
-            </div>
+          <DialogTitle
+            style={{
+              color: "#1E1E1E",
+              fontFamily: "Inter",
+              fontWeight: 600,
+              fontSize: "18px",
+              lineHeight: "24px",
+              letterSpacing: "0px",
+            }}
+          >
+            User Details
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* User Avatar and Basic Info */}
+          <div className="flex items-center space-x-4">
+            <Avatar className="w-16 h-16">
+              <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.firstName} />
+              <AvatarFallback className="bg-orange-100 text-orange-600 text-lg font-medium">
+                {user.firstName.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h3
+                style={{
+                  color: "#1E1E1E",
+                  fontFamily: "Inter",
+                  fontWeight: 500,
+                  fontSize: "16px",
+                  lineHeight: "24px",
+                  letterSpacing: "0px",
+                }}
+              >
+                {user.firstName} {user.lastName}
+              </h3>
+              <Badge variant={user.status === "enrolled" ? "default" : "secondary"} className="mt-1">
+                {user.status === "enrolled" ? "Enrolled" : "Unenrolled"}
+              </Badge>
+            </div>
+          </div>
+
+          {/* User Information */}
           <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Mail className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center space-x-3">
+              <Mail className="w-4 h-4 text-gray-500" />
               <div>
-                <p className="text-sm font-medium text-gray-900">Email</p>
-                <p className="text-sm text-gray-600">{user.email}</p>
+                <p
+                  className="text-sm text-gray-500"
+                  style={{
+                    fontFamily: "Inter",
+                    fontWeight: 400,
+                    fontSize: "12px",
+                    lineHeight: "16px",
+                  }}
+                >
+                  Email
+                </p>
+                <p
+                  style={{
+                    color: "#1E1E1E",
+                    fontFamily: "Inter",
+                    fontWeight: 400,
+                    fontSize: "14px",
+                    lineHeight: "20px",
+                    letterSpacing: "0px",
+                  }}
+                >
+                  {user.email}
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <User className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center space-x-3">
+              <Phone className="w-4 h-4 text-gray-500" />
               <div>
-                <p className="text-sm font-medium text-gray-900">Username</p>
-                <p className="text-sm text-gray-600">{user.firstName}</p>
+                <p
+                  className="text-sm text-gray-500"
+                  style={{
+                    fontFamily: "Inter",
+                    fontWeight: 400,
+                    fontSize: "12px",
+                    lineHeight: "16px",
+                  }}
+                >
+                  Phone
+                </p>
+                <p
+                  style={{
+                    color: "#1E1E1E",
+                    fontFamily: "Inter",
+                    fontWeight: 400,
+                    fontSize: "14px",
+                    lineHeight: "20px",
+                    letterSpacing: "0px",
+                  }}
+                >
+                  {user.phone}
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Shield className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center space-x-3">
+              <BookOpen className="w-4 h-4 text-gray-500" />
               <div>
-                <p className="text-sm font-medium text-gray-900">Role</p>
-                <p className="text-sm text-gray-600 capitalize">{user.role}</p>
+                <p
+                  className="text-sm text-gray-500"
+                  style={{
+                    fontFamily: "Inter",
+                    fontWeight: 400,
+                    fontSize: "12px",
+                    lineHeight: "16px",
+                  }}
+                >
+                  Courses
+                </p>
+                <p
+                  style={{
+                    color: "#1E1E1E",
+                    fontFamily: "Inter",
+                    fontWeight: 400,
+                    fontSize: "14px",
+                    lineHeight: "20px",
+                    letterSpacing: "0px",
+                  }}
+                >
+                  {user.courses}
+                </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <Calendar className="w-5 h-5 text-gray-400" />
+            <div className="flex items-center space-x-3">
+              <Calendar className="w-4 h-4 text-gray-500" />
               <div>
-                <p className="text-sm font-medium text-gray-900">Member Since</p>
-                <p className="text-sm text-gray-600">{new Date(user.createdAt).toLocaleDateString()}</p>
+                <p
+                  className="text-sm text-gray-500"
+                  style={{
+                    fontFamily: "Inter",
+                    fontWeight: 400,
+                    fontSize: "12px",
+                    lineHeight: "16px",
+                  }}
+                >
+                  Joined
+                </p>
+                <p
+                  style={{
+                    color: "#1E1E1E",
+                    fontFamily: "Inter",
+                    fontWeight: 400,
+                    fontSize: "14px",
+                    lineHeight: "20px",
+                    letterSpacing: "0px",
+                  }}
+                >
+                  {formatDate(user.createdAt)}
+                </p>
               </div>
             </div>
 
             {user.bio && (
-              <div>
-                <p className="text-sm font-medium text-gray-900 mb-2">Bio</p>
-                <p className="text-sm text-gray-600">{user.bio}</p>
+              <div className="flex items-start space-x-3">
+                <User className="w-4 h-4 text-gray-500 mt-1" />
+                <div>
+                  <p
+                    className="text-sm text-gray-500"
+                    style={{
+                      fontFamily: "Inter",
+                      fontWeight: 400,
+                      fontSize: "12px",
+                      lineHeight: "16px",
+                    }}
+                  >
+                    Bio
+                  </p>
+                  <p
+                    style={{
+                      color: "#1E1E1E",
+                      fontFamily: "Inter",
+                      fontWeight: 400,
+                      fontSize: "14px",
+                      lineHeight: "20px",
+                      letterSpacing: "0px",
+                    }}
+                  >
+                    {user.bio}
+                  </p>
+                </div>
               </div>
             )}
           </div>
 
-          <Separator />
-
-          <div className="flex flex-col gap-2">
-            <h4 className="text-sm font-medium text-gray-900">Actions</h4>
-            <div className="flex flex-wrap gap-2">
-              <Button variant="outline" size="sm" onClick={() => onNudge(user)}>
-                Send Nudge
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => onSuspend(user)}>
-                Suspend User
-              </Button>
-              <Button variant="destructive" size="sm" onClick={() => onDeactivate(user)}>
-                Deactivate
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={onClose}>
-              Close
+          {/* Action Buttons */}
+          <div className="flex space-x-2 pt-4 border-t">
+            <Button
+              onClick={() => onNudge(user)}
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              style={{
+                fontFamily: "Inter",
+                fontWeight: 400,
+                fontSize: "14px",
+                lineHeight: "20px",
+                letterSpacing: "0px",
+              }}
+            >
+              Nudge
+            </Button>
+            <Button
+              onClick={() => onSuspend(user)}
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              style={{
+                fontFamily: "Inter",
+                fontWeight: 400,
+                fontSize: "14px",
+                lineHeight: "20px",
+                letterSpacing: "0px",
+              }}
+            >
+              Suspend
+            </Button>
+            <Button
+              onClick={() => onDeactivate(user)}
+              variant="destructive"
+              size="sm"
+              className="flex-1"
+              style={{
+                fontFamily: "Inter",
+                fontWeight: 400,
+                fontSize: "14px",
+                lineHeight: "20px",
+                letterSpacing: "0px",
+              }}
+            >
+              Deactivate
             </Button>
           </div>
         </div>

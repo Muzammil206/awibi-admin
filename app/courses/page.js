@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { CoursesTable } from "@/components/courses-table"
@@ -9,13 +9,17 @@ import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AddCourseModal } from "@/components/add-course-modal"
-import { CreateCouponModal } from "@/components/create-coupon-modal" // Import the new modal
+import { CreateCouponModal } from "@/components/create-coupon-modal"
 import { useCourseStore } from "@/lib/course-store"
 
 export default function CoursesPage() {
-  const { selectedFilter, setSelectedFilter } = useCourseStore()
+  const { selectedFilter, setSelectedFilter, fetchCourses, isLoading } = useCourseStore()
   const [showAddCourseModal, setShowAddCourseModal] = useState(false)
-  const [showCreateCouponModal, setShowCreateCouponModal] = useState(false) // New state for coupon modal
+  const [showCreateCouponModal, setShowCreateCouponModal] = useState(false)
+
+  useEffect(() => {
+    fetchCourses()
+  }, [])
 
   return (
     <SidebarProvider defaultOpen={true}>
