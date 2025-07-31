@@ -8,6 +8,11 @@ import { useCourseStore } from "@/lib/course-store"
 export function StatsCards() {
 
   const users = useUserStore((state) => state.users)
+  const fetchUsers = useUserStore((state) => state.fetchUsers)
+
+  useEffect(() => {
+    fetchUsers()
+  }, [fetchUsers])
   const courses = useCourseStore((state) => state.courses)
   const enrolledUsers = users.filter((u) => u.status === "enrolled")
 
