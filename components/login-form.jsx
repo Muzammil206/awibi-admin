@@ -76,7 +76,7 @@ export function LoginForm() {
         })
 
         toast.success("Login successful! Redirecting to dashboard...")
-        router.push("/dashboard")
+        window.location.href = "/dashboard"
       } else {
         toast.error(data.message || "Login failed. Please check your credentials.")
       }
