@@ -68,6 +68,13 @@ export function LoginForm() {
         localStorage.setItem("authToken", authToken)
         setAuthToken(authToken)
 
+        // Set cookie for middleware (production safe)
+        await fetch("/api/auth/set-cookie", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: authToken })
+        })
+
         toast.success("Login successful! Redirecting to dashboard...")
         router.push("/dashboard")
       } else {
