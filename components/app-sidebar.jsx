@@ -1,5 +1,6 @@
 "use client"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { usePathname } from "next/navigation"
 import Image from "next/image"
 import { LayoutDashboard, BookOpen, Users, Settings, BarChart2, LogOut, FolderOpen } from "lucide-react"
@@ -52,6 +53,8 @@ export function AppSidebar({ ...props }) {
     },
   ]
 
+  const router = useRouter()
+
   return (
     <Sidebar {...props} className="border-r border-gray-200">
       <SidebarHeader className="p-6 border-b border-gray-100">
@@ -97,13 +100,16 @@ export function AppSidebar({ ...props }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton
-                asChild
                 className="h-12 px-4 rounded-xl font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200"
+                onClick={() => {
+                  localStorage.removeItem("authToken")
+                  router.push("/Login")
+                }}
               >
-                <Link href="/logout" className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                   <LogOut className="w-5 h-5" />
                   <span>Logout</span>
-                </Link>
+                </div>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>

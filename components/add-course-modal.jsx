@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Upload, ImageIcon, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,14 +12,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Switch } from "@/components/ui/switch"
 import { useCourseStore } from "@/lib/course-store"
 import { toast } from "sonner"
+import { createClient } from "@supabase/supabase-js"
+
+// Initialize Supabase client
+const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 export function AddCourseModal({ isOpen, onClose }) {
   const addCourse = useCourseStore((state) => state.addCourse)
+  const [categories, setCategories] = useState([])
+  const [loadingCategories, setLoadingCategories] = useState(false)
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
-    category_id: "", // Will need to fetch categories from backend
+    category_id: "",
     price: "",
     summary: "",
     discounted_price: "",
@@ -28,23 +34,58 @@ export function AddCourseModal({ isOpen, onClose }) {
     thumbnail_url: null,
     instructor_name: "",
     is_published: false,
-    modules: [{
-      title: "",
-      description: "",
-      is_published: true,
-      contents: [{
-        content_type: "video",
+    modules: [
+      {
         title: "",
         description: "",
-        video_url: "",
-        is_published: true
-      }]
-    }]
+        is_published: true,
+        contents: [
+          {
+            content_type: "video",
+            title: "",
+            description: "",
+            video_url: "",
+            is_published: true,
+          },
+        ],
+      },
+    ],
   })
 
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [imagePreview, setImagePreview] = useState(null)
+
+  // Fetch categories from Supabase
+  const fetchCategories = async () => {
+    setLoadingCategories(true)
+    try {
+      const { data, error } = await supabase
+        .from("course_categories")
+        .select("id, name, description")
+        .order("name", { ascending: true })
+
+      if (error) {
+        console.error("Error fetching categories:", error)
+        toast.error("Failed to load categories")
+        return
+      }
+
+      setCategories(data || [])
+    } catch (error) {
+      console.error("Error fetching categories:", error)
+      toast.error("Failed to load categories")
+    } finally {
+      setLoadingCategories(false)
+    }
+  }
+
+  // Fetch categories when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchCategories()
+    }
+  }, [isOpen])
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -54,7 +95,7 @@ export function AddCourseModal({ isOpen, onClose }) {
   }
 
   const handleImageUpload = (event) => {
-    const file = event.target.files[0]
+    const file = event.target.files?.[0]
     if (file) {
       if (file.size > 1048576) {
         setErrors((prev) => ({ ...prev, image: "Image size should be under 1MB" }))
@@ -64,34 +105,36 @@ export function AddCourseModal({ isOpen, onClose }) {
         setErrors((prev) => ({ ...prev, image: "Please select a valid image file" }))
         return
       }
-
       setFormData((prev) => ({ ...prev, image: file }))
       setErrors((prev) => ({ ...prev, image: "" }))
-
       const reader = new FileReader()
-      reader.onload = (e) => setImagePreview(e.target.result)
+      reader.onload = (e) => setImagePreview(e.target?.result)
       reader.readAsDataURL(file)
     }
   }
 
   const validateForm = () => {
     const newErrors = {}
-
     if (!formData.title.trim()) newErrors.title = "Course title is required"
     if (!formData.category_id) newErrors.category_id = "Category is required"
     if (!formData.description.trim()) newErrors.description = "Description is required"
     if (!formData.instructor_name.trim()) newErrors.instructor_name = "Instructor name is required"
     if (!formData.duration) newErrors.duration = "Course duration is required"
-    if (!formData.price && formData.price !== 0) newErrors.price = "Price is required"
+    if (!formData.price && formData.price !== "0") newErrors.price = "Price is required"
     if (formData.price && isNaN(Number(formData.price))) newErrors.price = "Invalid price"
     if (!formData.summary.trim()) newErrors.summary = "Summary is required"
-    
+
     // Validate modules
-    const moduleErrors = formData.modules.some(module => {
-      return !module.title.trim() || !module.description.trim() || 
-        module.contents.some(content => !content.title.trim() || !content.description.trim() || !content.video_url.trim())
+    const moduleErrors = formData.modules.some((module) => {
+      return (
+        !module.title.trim() ||
+        !module.description.trim() ||
+        module.contents.some(
+          (content) => !content.title.trim() || !content.description.trim() || !content.video_url.trim(),
+        )
+      )
     })
-    
+
     if (moduleErrors) {
       newErrors.modules = "All modules and their contents must be filled out"
       toast.error("Please complete all module and content information")
@@ -101,6 +144,40 @@ export function AddCourseModal({ isOpen, onClose }) {
     return Object.keys(newErrors).length === 0
   }
 
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      category_id: "",
+      price: "",
+      summary: "",
+      discounted_price: "",
+      duration: "",
+      level: "beginner",
+      thumbnail_url: null,
+      instructor_name: "",
+      is_published: false,
+      modules: [
+        {
+          title: "",
+          description: "",
+          is_published: true,
+          contents: [
+            {
+              content_type: "video",
+              title: "",
+              description: "",
+              video_url: "",
+              is_published: true,
+            },
+          ],
+        },
+      ],
+    })
+    setImagePreview(null)
+    setErrors({})
+  }
+
   const handleSubmit = async (status) => {
     if (!validateForm()) {
       toast.error("Please fix the errors in the form")
@@ -108,117 +185,126 @@ export function AddCourseModal({ isOpen, onClose }) {
     }
 
     setIsSubmitting(true)
-
     try {
+      // Get current user and check admin permission
+      
+      
+
       // Generate a slug from the title
       const slug = formData.title
         .toLowerCase()
-        .replace(/ /g, '-')
-        .replace(/[^\w-]+/g, '')
+        .replace(/ /g, "-")
+        .replace(/[^\w-]+/g, "")
 
+      // Prepare course data
       const courseData = {
         title: formData.title,
         description: formData.description,
         category_id: formData.category_id,
-        price: Number(formData.price),
         slug: slug,
         summary: formData.summary,
-        discounted_price: Number(formData.discounted_price),
+        price: Number(formData.price),
+        discounted_price: formData.discounted_price ? Number(formData.discounted_price) : null,
         duration: Number(formData.duration),
         level: formData.level,
-        thumbnail_url: imagePreview, // This should be updated to use actual uploaded image URL
+        thumbnail_url: imagePreview,
         instructor_name: formData.instructor_name,
         is_published: status === "Published",
-        modules: formData.modules.map(module => ({
-          title: module.title,
-          description: module.description,
-          is_published: true,
-          contents: module.contents.map(content => ({
-            content_type: content.content_type,
-            title: content.title,
-            description: content.description,
-            video_url: content.video_url,
-            is_published: true
-          }))
-        }))
       }
 
-      // Get auth token
-      const token = localStorage.getItem("authToken")
-      if (!token) {
-        throw new Error("No authentication token available. Please login first.")
+      // Insert course
+      const { data: course, error: courseError } = await supabase.from("courses").insert(courseData).select().single()
+
+      if (courseError) {
+        throw new Error(`Failed to create course: ${courseError.message}`)
       }
 
-      // Make API call to backend
-      const response = await fetch('http://localhost:3000/api/v1/courses', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(courseData)
-      })
+      // Process modules
+      const processedModules = await Promise.all(
+        formData.modules.map(async (module, index) => {
+          // Insert module
+          const { data: insertedModule, error: moduleError } = await supabase
+            .from("modules")
+            .insert({
+              course_id: course.id,
+              title: module.title,
+              description: module.description,
+              position: index + 1,
+              is_published: module.is_published || false,
+            })
+            .select()
+            .single()
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Authentication failed. Please login again.")
-        }
-        throw new Error(`Failed to create course: ${response.status}`)
+          if (moduleError) {
+            throw new Error(`Failed to create module: ${moduleError.message}`)
+          }
+
+          // Process module contents
+          if (module.contents && module.contents.length > 0) {
+            const moduleContents = module.contents.map((content, contentIndex) => ({
+              module_id: insertedModule.id,
+              content_type: content.content_type,
+              title: content.title,
+              description: content.description,
+              position: contentIndex + 1,
+              is_published: content.is_published || false,
+              video_url: content.video_url,
+            }))
+
+            const { data: insertedContents, error: contentError } = await supabase
+              .from("module_contents")
+              .insert(moduleContents)
+              .select()
+
+            if (contentError) {
+              throw new Error(`Failed to create module contents: ${contentError.message}`)
+            }
+
+            // Handle additional content type specifics
+            await Promise.all(
+              insertedContents.map(async (content) => {
+                switch (content.content_type) {
+                  case "video":
+                    // Insert into content_videos table if you have additional video-specific fields
+                    const { error: videoError } = await supabase.from("content_videos").insert({
+                      content_id: content.id,
+                      video_url: content.video_url,
+                      // Add other video-specific fields if you have them
+                      // duration: content.duration,
+                      // thumbnail_url: content.thumbnail_url
+                    })
+
+                    if (videoError) {
+                      console.warn(`Failed to create video content: ${videoError.message}`)
+                      // Don't throw error here as the main content was created successfully
+                    }
+                    break
+                  // Add other content type handling as needed
+                }
+              }),
+            )
+
+            // Add contents to the module object
+            insertedModule.contents = insertedContents
+          }
+
+          return insertedModule
+        }),
+      )
+
+      // Add to store if available
+      if (addCourse) {
+        addCourse({
+          ...course,
+          modules: processedModules,
+        })
       }
 
       toast.success(`Course ${status === "Published" ? "published" : "drafted"} successfully!`)
+      resetForm()
       onClose()
-
-      // Reset form
-      setFormData({
-        title: "",
-        description: "",
-        category_id: "",
-        price: "",
-        summary: "",
-        discounted_price: "",
-        duration: "",
-        level: "beginner",
-        thumbnail_url: null,
-        instructor_name: "",
-        is_published: false,
-        modules: [{
-          title: "",
-          description: "",
-          is_published: true,
-          contents: [{
-            content_type: "video",
-            title: "",
-            description: "",
-            video_url: "",
-            is_published: true
-          }]
-        }]
-      })
-      setImagePreview(null)
-
-      addCourse(newCourse)
-
-      toast.success(`Course ${status === "Published" ? "published" : "drafted"} successfully!`)
-      onClose()
-      // Reset form after successful submission
-      setFormData({
-        title: "",
-        category: "",
-        description: "",
-        educator: "",
-        courseDuration: "",
-        price: "",
-        discount: "10%",
-        moduleTitle: "",
-        moduleDescription: "",
-        moduleContent: "",
-        isFreeCourse: false,
-        image: null,
-      })
-      setImagePreview(null)
     } catch (error) {
-      toast.error("Failed to add course. Please try again.")
+      toast.error(error.message || "Failed to add course. Please try again.")
       console.error("Error adding course:", error)
     } finally {
       setIsSubmitting(false)
@@ -227,10 +313,7 @@ export function AddCourseModal({ isOpen, onClose }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent 
-        className="max-w-4xl max-h-[90vh] overflow-y-auto p-6"
-        description="Form to add a new course to the platform. Fill in course details including title, category, description, educator information, and pricing."
-      >
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-6">
         <DialogHeader className="flex flex-row items-center justify-between pb-4">
           <DialogTitle className="text-2xl font-bold text-gray-900">Course Details</DialogTitle>
           <Button variant="ghost" size="icon" onClick={onClose} className="p-0">
@@ -260,7 +343,6 @@ export function AddCourseModal({ isOpen, onClose }) {
                       <ImageIcon className="w-12 h-12 text-gray-400" />
                     </div>
                   )}
-
                   <p className="text-sm text-gray-500">Drag and drop or click to upload</p>
                   <div>
                     <input
@@ -301,16 +383,27 @@ export function AddCourseModal({ isOpen, onClose }) {
               />
               {errors.title && <p className="text-sm text-red-600">{errors.title}</p>}
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="category">Category</Label>
-              <Select value={formData.category_id} onValueChange={(value) => handleInputChange("category_id", value)}>
+              <Select
+                value={formData.category_id}
+                onValueChange={(value) => handleInputChange("category_id", value)}
+                disabled={loadingCategories}
+              >
                 <SelectTrigger className={errors.category_id ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select category" />
+                  <SelectValue placeholder={loadingCategories ? "Loading categories..." : "Select category"} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="444d3f42-44ec-45dd-985e-e007860ff7ce">Programming</SelectItem>
-                  {/* Add other categories with their UUIDs */}
+                  {categories.map((category) => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                  {categories.length === 0 && !loadingCategories && (
+                    <SelectItem value="" disabled>
+                      No categories available
+                    </SelectItem>
+                  )}
                 </SelectContent>
               </Select>
               {errors.category_id && <p className="text-sm text-red-600">{errors.category_id}</p>}
@@ -330,7 +423,6 @@ export function AddCourseModal({ isOpen, onClose }) {
               />
               {errors.description && <p className="text-sm text-red-600">{errors.description}</p>}
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="summary">Summary</Label>
               <Textarea
@@ -356,7 +448,6 @@ export function AddCourseModal({ isOpen, onClose }) {
               />
               {errors.instructor_name && <p className="text-sm text-red-600">{errors.instructor_name}</p>}
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="level">Course Level</Label>
               <Select value={formData.level} onValueChange={(value) => handleInputChange("level", value)}>
@@ -386,7 +477,6 @@ export function AddCourseModal({ isOpen, onClose }) {
               />
               {errors.duration && <p className="text-sm text-red-600">{errors.duration}</p>}
             </div>
-
             <div className="space-y-2">
               <Label htmlFor="price">Price ($)</Label>
               <Input
@@ -395,7 +485,7 @@ export function AddCourseModal({ isOpen, onClose }) {
                 step="0.01"
                 placeholder="Enter course price"
                 value={formData.price}
-                onChange={(e) => handleInputChange("price", Number(e.target.value))}
+                onChange={(e) => handleInputChange("price", e.target.value)}
                 className={errors.price ? "border-red-500" : ""}
               />
               {errors.price && <p className="text-sm text-red-600">{errors.price}</p>}
@@ -411,7 +501,7 @@ export function AddCourseModal({ isOpen, onClose }) {
               step="0.01"
               placeholder="Enter discounted price"
               value={formData.discounted_price}
-              onChange={(e) => handleInputChange("discounted_price", Number(e.target.value))}
+              onChange={(e) => handleInputChange("discounted_price", e.target.value)}
             />
           </div>
 
@@ -419,18 +509,21 @@ export function AddCourseModal({ isOpen, onClose }) {
           <div className="space-y-4 border-t border-gray-200 pt-6">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">Modules</h3>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="bg-transparent text-green-600 hover:bg-green-50"
                 onClick={() => {
-                  setFormData(prev => ({
+                  setFormData((prev) => ({
                     ...prev,
-                    modules: [...prev.modules, {
-                      title: "",
-                      description: "",
-                      is_published: true,
-                      contents: []
-                    }]
+                    modules: [
+                      ...prev.modules,
+                      {
+                        title: "",
+                        description: "",
+                        is_published: true,
+                        contents: [],
+                      },
+                    ],
                   }))
                 }}
                 type="button"
@@ -449,9 +542,9 @@ export function AddCourseModal({ isOpen, onClose }) {
                       size="sm"
                       className="text-red-500 hover:text-red-600"
                       onClick={() => {
-                        setFormData(prev => ({
+                        setFormData((prev) => ({
                           ...prev,
-                          modules: prev.modules.filter((_, i) => i !== moduleIndex)
+                          modules: prev.modules.filter((_, i) => i !== moduleIndex),
                         }))
                       }}
                       type="button"
@@ -468,7 +561,7 @@ export function AddCourseModal({ isOpen, onClose }) {
                     onChange={(e) => {
                       const newModules = [...formData.modules]
                       newModules[moduleIndex].title = e.target.value
-                      setFormData(prev => ({ ...prev, modules: newModules }))
+                      setFormData((prev) => ({ ...prev, modules: newModules }))
                     }}
                     placeholder="Enter module title"
                   />
@@ -481,7 +574,7 @@ export function AddCourseModal({ isOpen, onClose }) {
                     onChange={(e) => {
                       const newModules = [...formData.modules]
                       newModules[moduleIndex].description = e.target.value
-                      setFormData(prev => ({ ...prev, modules: newModules }))
+                      setFormData((prev) => ({ ...prev, modules: newModules }))
                     }}
                     placeholder="Enter module description"
                     className="min-h-[80px]"
@@ -494,7 +587,7 @@ export function AddCourseModal({ isOpen, onClose }) {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-green-600 hover:bg-green-50"
+                      className="text-green-600 hover:bg-green-50 bg-transparent"
                       onClick={() => {
                         const newModules = [...formData.modules]
                         newModules[moduleIndex].contents.push({
@@ -502,9 +595,9 @@ export function AddCourseModal({ isOpen, onClose }) {
                           title: "",
                           description: "",
                           video_url: "",
-                          is_published: true
+                          is_published: true,
                         })
-                        setFormData(prev => ({ ...prev, modules: newModules }))
+                        setFormData((prev) => ({ ...prev, modules: newModules }))
                       }}
                       type="button"
                     >
@@ -523,21 +616,20 @@ export function AddCourseModal({ isOpen, onClose }) {
                           onClick={() => {
                             const newModules = [...formData.modules]
                             newModules[moduleIndex].contents = module.contents.filter((_, i) => i !== contentIndex)
-                            setFormData(prev => ({ ...prev, modules: newModules }))
+                            setFormData((prev) => ({ ...prev, modules: newModules }))
                           }}
                           type="button"
                         >
                           Remove
                         </Button>
                       </div>
-
                       <div className="space-y-2">
                         <Input
                           value={content.title}
                           onChange={(e) => {
                             const newModules = [...formData.modules]
                             newModules[moduleIndex].contents[contentIndex].title = e.target.value
-                            setFormData(prev => ({ ...prev, modules: newModules }))
+                            setFormData((prev) => ({ ...prev, modules: newModules }))
                           }}
                           placeholder="Content title"
                         />
@@ -546,7 +638,7 @@ export function AddCourseModal({ isOpen, onClose }) {
                           onChange={(e) => {
                             const newModules = [...formData.modules]
                             newModules[moduleIndex].contents[contentIndex].description = e.target.value
-                            setFormData(prev => ({ ...prev, modules: newModules }))
+                            setFormData((prev) => ({ ...prev, modules: newModules }))
                           }}
                           placeholder="Content description"
                           className="min-h-[60px]"
@@ -556,7 +648,7 @@ export function AddCourseModal({ isOpen, onClose }) {
                           onChange={(e) => {
                             const newModules = [...formData.modules]
                             newModules[moduleIndex].contents[contentIndex].video_url = e.target.value
-                            setFormData(prev => ({ ...prev, modules: newModules }))
+                            setFormData((prev) => ({ ...prev, modules: newModules }))
                           }}
                           placeholder="Video URL"
                         />
@@ -575,11 +667,10 @@ export function AddCourseModal({ isOpen, onClose }) {
             </Label>
             <Switch
               id="free-course"
-              checked={formData.isFreeCourse}
+              checked={formData.price === "0"}
               onCheckedChange={(checked) => {
-                handleInputChange("isFreeCourse", checked)
                 if (checked) {
-                  handleInputChange("price", "0.00") // Set price to 0 if free
+                  handleInputChange("price", "0")
                 }
               }}
             />

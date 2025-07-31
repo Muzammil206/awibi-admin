@@ -2,26 +2,33 @@
 
 import { Users, BookOpen, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { useUserStore } from "@/lib/users-store"
+import { useCourseStore } from "@/lib/course-store"
+
 
 export function AnalyticsMetricCards() {
+  const users = useUserStore((state) => state.users)
+  const courses = useCourseStore((state) => state.courses)
+
+  // For demo, use static trend data. Replace with real trend data if available.
   const metrics = [
     {
       title: "Total Users",
-      value: "5,874",
-      change: "+140 New Joined",
+      value: users.length.toLocaleString(),
+      change: `+${users.length > 0 ? users.length : 0} New Joined`, // Placeholder, replace with real delta if available
       icon: Users,
       iconBg: "bg-blue-500",
       chartColor: "text-blue-500",
-      trendData: [20, 30, 25, 35, 40, 30, 45, 38, 42, 50, 45, 48], // Sample trend data
+      trendData: [20, 30, 25, 35, 40, 30, 45, 38, 42, 50, 45, 48],
     },
     {
       title: "Total Courses",
-      value: "2,34,888",
-      change: "+52 Sales Today",
+      value: courses.length.toLocaleString(),
+      change: `+${courses.length > 0 ? courses.length : 0} Sales Today`, // Placeholder, replace with real delta if available
       icon: BookOpen,
       iconBg: "bg-green-500",
       chartColor: "text-green-500",
-      trendData: [25, 35, 30, 40, 45, 35, 50, 42, 48, 55, 50, 53], // Sample trend data
+      trendData: [25, 35, 30, 40, 45, 35, 50, 42, 48, 55, 50, 53],
     },
   ]
 

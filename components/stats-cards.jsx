@@ -1,32 +1,41 @@
 import { Users, BookOpen, UserCheck, Heart } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
+import { useState, useEffect } from "react" 
+import { useUserStore } from "@/lib/users-store"
+import { useCourseStore } from "@/lib/course-store"
+
 
 export function StatsCards() {
+
+  const users = useUserStore((state) => state.users)
+  const courses = useCourseStore((state) => state.courses)
+  const enrolledUsers = users.filter((u) => u.status === "enrolled")
+
   const stats = [
     {
       title: "Users",
-      value: "592k",
+      value: users.length,
       icon: Users,
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600",
     },
     {
       title: "Courses",
-      value: "3.5k",
+      value: courses.length,
       icon: BookOpen,
       iconBg: "bg-green-100",
       iconColor: "text-green-600",
     },
     {
       title: "Enrolled users",
-      value: "2.9k",
+      value: enrolledUsers.length,
       icon: UserCheck,
       iconBg: "bg-purple-100",
       iconColor: "text-purple-600",
     },
     {
       title: "Certificates",
-      value: "952",
+      value: "-",
       icon: Heart,
       iconBg: "bg-red-100",
       iconColor: "text-red-600",
