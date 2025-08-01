@@ -5,14 +5,11 @@ import Image from "next/image"
 export default function SignupPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50">
-      <Header />
+     
 
       <main className="flex-1">
         {/* Welcome Section */}
-        <div className="text-center py-12 bg-gradient-to-r from-green-500/10 to-blue-500/10 backdrop-blur-sm">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Welcome to Awibi Institute!</h1>
-          <p className="text-gray-600 text-lg">Start your learning journey today</p>
-        </div>
+       
 
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

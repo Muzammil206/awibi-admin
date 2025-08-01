@@ -31,7 +31,7 @@ export default function DashboardPage() {
               window.location.reload()
             }}
           >
-            Sign Out
+            Sign Out.
           </Button>
         </header>
 
